@@ -1,12 +1,8 @@
+import "dotenv/config";
 import express from "express";
-import { PrismaClient } from "@prisma/client";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "./prisma";
 
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+
 
 const app = express();
 
@@ -16,6 +12,38 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 
+
+app.get('/users', async (_, res) => {
+  const users = await prisma.user.findFirst({
+    where: { email: 'alice@gmail.com' }
+  });
+  res.json(users);
+})
+
+
+app.put('/users', async (_, res) => {
+  const updatedUsers = await prisma.user.update({
+    where: {
+      email: 'bob@gmail.com'
+    },
+    data: {
+      name: 'Ayan',
+      age: 20,
+      isMarried: true,
+      nationality: 'Bangladeshi'
+    }
+  })
+  res.json(updatedUsers);
+})
+
+app.delete('/users', async (_, res) => {
+  const deletedUsers = await prisma.user.delete({
+    where: {
+      email: 'alice@gmail.com'
+    }
+  })
+  res.json(deletedUsers);
+})
 
 app.listen(4000, () => {
   console.log("Server running on port 4000");
